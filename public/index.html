@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>早餐管理应用 | Breakfast Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+  <!-- 主容器 -->
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- 头部 -->
+    <header class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-indigo-600 mb-2">🍳 早餐管理应用</h1>
+      <p class="text-gray-600">智能库存管理 · AI营养建议</p>
+    </header>
+
+    <!-- 导航标签 -->
+    <nav class="flex justify-center mb-8">
+      <div class="bg-white rounded-xl shadow-lg p-2 flex gap-2 items-center">
+        <button id="nav-breakfast" class="nav-btn active px-6 py-3 rounded-lg font-medium transition-all duration-300">
+          📦 库存管理
+        </button>
+        <button id="nav-ai" class="nav-btn px-6 py-3 rounded-lg font-medium transition-all duration-300">
+          🤖 今日建议
+        </button>
+        <button id="nav-user" class="nav-btn px-6 py-3 rounded-lg font-medium transition-all duration-300">
+          ⚙️ 用户设置
+        </button>
+        <div class="ml-auto flex gap-2">
+          <button id="lang-zh" class="lang-btn px-4 py-2 rounded-lg font-medium transition-all duration-300 bg-indigo-600 text-white">
+            中
+          </button>
+          <button id="lang-en" class="lang-btn px-4 py-2 rounded-lg font-medium transition-all duration-300">
+            EN
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 内容区域 -->
+    <main>
+      <!-- 库存管理页面 -->
+      <section id="page-breakfast" class="page active">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">早餐库存管理</h2>
+            <button id="btn-add-breakfast" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-300">
+              + 添加早餐
+            </button>
+          </div>
+
+          <!-- 库存列表 -->
+          <div id="breakfast-list" class="space-y-4">
+            <!-- 动态生成 -->
+          </div>
+
+          <!-- 空状态 -->
+          <div id="empty-breakfast" class="text-center py-12 text-gray-400 hidden">
+            <div class="text-6xl mb-4">🥣</div>
+            <p>还没有添加早餐，点击上方按钮添加吧！</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 今日建议页面 -->
+      <section id="page-ai" class="page">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">AI早餐建议</h2>
+            <button id="btn-get-suggestion" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300">
+              ✨ 获取建议
+            </button>
+          </div>
+
+          <!-- 建议内容 -->
+          <div id="suggestion-content" class="space-y-6">
+            <!-- 动态生成 -->
+          </div>
+
+          <!-- 空状态 -->
+          <div id="empty-suggestion" class="text-center py-12 text-gray-400">
+            <div class="text-6xl mb-4">🤖</div>
+            <p>点击"获取建议"按钮，AI将为您推荐今日早餐</p>
+          </div>
+
+          <!-- 加载状态 -->
+          <div id="loading-suggestion" class="text-center py-12 hidden">
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-indigo-600 border-t-transparent mx-auto mb-4"></div>
+            <p class="text-gray-600">AI正在思考中...</p>
+          </div>
+
+          <!-- 历史记录 -->
+          <div class="mt-8 pt-8 border-t border-gray-200">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">📅 最近早餐记录</h3>
+            <div id="history-list" class="space-y-3">
+              <!-- 动态生成 -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 用户设置页面 -->
+      <section id="page-user" class="page">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6">用户设置</h2>
+
+          <form id="user-form" class="space-y-6">
+            <!-- 基本信息 -->
+            <div class="border-b border-gray-200 pb-6">
+              <h3 class="text-lg font-semibold text-gray-700 mb-4">基本信息</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-600 mb-2">身高 (cm)</label>
+                  <input type="number" id="user-height" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="175">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-600 mb-2">体重 (kg)</label>
+                  <input type="number" id="user-weight" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="70">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-600 mb-2">年龄</label>
+                  <input type="number" id="user-age" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="30">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-600 mb-2">性别</label>
+                  <select id="user-gender" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    <option value="male">男</option>
+                    <option value="female">女</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-600 mb-2">特殊需求</label>
+                <textarea id="user-special-needs" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="例如：减脂期、需要高蛋白、无乳糖等"></textarea>
+              </div>
+            </div>
+
+            <!-- AI配置 -->
+            <div class="border-b border-gray-200 pb-6">
+              <h3 class="text-lg font-semibold text-gray-700 mb-4">AI配置</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-600 mb-2">API密钥</label>
+                  <input type="password" id="user-api-key" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="sk-xxx">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-600 mb-2">API地址</label>
+                  <input type="text" id="user-api-url" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="https://api.deepseek.com/v1/chat/completions">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-600 mb-2">模型名称</label>
+                  <input type="text" id="user-api-model" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="deepseek-chat">
+                </div>
+              </div>
+            </div>
+
+            <!-- 保存按钮 -->
+            <div class="flex justify-end gap-3">
+              <button type="button" id="btn-save-user" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-300">
+                💾 保存用户信息
+              </button>
+              <button type="button" id="btn-save-ai" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-300">
+                🤖 保存AI配置
+              </button>
+            </div>
+
+            <!-- 重置数据 -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+              <h3 class="text-lg font-semibold text-red-600 mb-4">⚠️ 危险操作</h3>
+              <div class="flex justify-end">
+                <button type="button" id="btn-reset-data" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-300">
+                  🗑️ 重置所有数据
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- 添加早餐模态框 -->
+    <div id="modal-add-breakfast" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">添加早餐</h3>
+        <form id="form-add-breakfast" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">早餐名称</label>
+            <input type="text" id="breakfast-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="例如：牛奶" required>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-2">剩余量</label>
+              <input type="number" id="breakfast-remaining" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="10" required min="0">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-2">单位</label>
+              <input type="text" id="breakfast-unit" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="盒" required>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-2">每次消耗量</label>
+              <input type="number" id="breakfast-consumption" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="1" required min="0.1" step="0.1">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-600 mb-2">提醒线</label>
+              <input type="number" id="breakfast-alert" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="3" required min="0">
+            </div>
+          </div>
+          <div class="flex justify-end gap-3 mt-6">
+            <button type="button" id="btn-cancel-add" class="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300">
+              取消
+            </button>
+            <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-300">
+              添加
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div id="modal-delete" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">确认删除</h3>
+        <p class="text-gray-600 mb-6">确定要删除这个早餐吗？</p>
+        <div class="flex justify-end gap-3">
+          <button type="button" id="btn-cancel-delete" class="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300">
+            取消
+          </button>
+          <button type="button" id="btn-confirm-delete" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-300">
+            确认删除
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 重置数据库模态框 -->
+    <div id="modal-reset" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">确认重置</h3>
+        <p class="text-gray-600 mb-6">确定要重置所有数据吗？此操作不可恢复！</p>
+        <div class="flex justify-end gap-3">
+          <button type="button" id="btn-cancel-reset" class="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-300">
+            取消
+          </button>
+          <button type="button" id="btn-confirm-reset" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-300">
+            确认重置
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 库存不足提醒模态框 -->
+    <div id="modal-alert" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all border-4 border-red-500">
+        <h3 id="alert-modal-title" class="text-2xl font-bold text-red-800 mb-4">⚠️ 库存不足提醒</h3>
+        <div id="alert-content" class="space-y-3 mb-6 max-h-60 overflow-y-auto">
+          <!-- 动态插入库存不足的早餐列表 -->
+        </div>
+        <div class="flex justify-end gap-3">
+          <button type="button" id="btn-close-alert" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-300">
+            我知道了
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 补充库存模态框 -->
+    <div id="modal-restock" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all border-4 border-blue-500">
+        <h3 class="text-2xl font-bold text-blue-800 mb-6">补充库存</h3>
+        <form id="form-restock" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-blue-600 mb-2">补充数量</label>
+            <input type="number" id="restock-amount" class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="1" required min="1" step="1">
+          </div>
+          <div class="flex justify-end gap-3 mt-6">
+            <button type="button" id="btn-cancel-restock" class="px-6 py-2 border border-blue-300 rounded-lg font-medium hover:bg-blue-50 text-blue-600 transition-colors duration-300">
+              取消
+            </button>
+            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-300">
+              确认补充
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- GitHub Star按钮 -->
+    <footer class="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-r from-gray-900 to-gray-800 text-white">
+      <div class="container mx-auto max-w-6xl flex justify-center items-center">
+        <a href="https://github.com/wangshengithub/breakfast-manager" target="_blank" class="flex items-center gap-2 text-sm hover:text-indigo-400 transition-colors duration-300">
+          <span>⭐ Star on GitHub</span>
+      </div>
+    </footer>
+
+    <!-- 提示消息 -->
+    <div id="toast" class="fixed bottom-8 right-8 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+      <div class="bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg">
+        <span id="toast-message"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 脚本 -->
+  <script src="js/app.js"></script>
+  <script src="js/breakfast.js"></script>
+  <script src="js/user.js"></script>
+  <script src="js/ai.js"></script>
+</body>
+</html>

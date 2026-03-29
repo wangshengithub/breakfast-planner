@@ -1,0 +1,23 @@
+{
+  "name": "breakfast-manager",
+  "version": "1.0.0",
+  "description": "早餐管理应用 - 库存管理和AI智能建议",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "keywords": [
+    "breakfast",
+    "management",
+    "ai",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  }
+}

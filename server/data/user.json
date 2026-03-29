@@ -1,0 +1,10 @@
+{
+  "height": 175,
+  "weight": 70,
+  "age": 30,
+  "gender": "male",
+  "specialNeeds": "",
+  "aiApiKey": "",
+  "aiApiUrl": "https://api.deepseek.com/v1/chat/completions",
+  "aiModel": "deepseek-chat"
+}
