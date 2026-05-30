@@ -1,3 +1,149 @@
 {
-  "records": []
+  "records": [
+    {
+      "date": "2026-05-24",
+      "breakfasts": [
+        {
+          "name": "纯牛奶",
+          "consumed": 1,
+          "unit": "盒"
+        },
+        {
+          "name": "全麦面包",
+          "consumed": 0.5,
+          "unit": "袋"
+        },
+        {
+          "name": "鸡蛋",
+          "consumed": 2,
+          "unit": "个"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-25",
+      "breakfasts": [
+        {
+          "name": "酸奶",
+          "consumed": 1,
+          "unit": "杯"
+        },
+        {
+          "name": "燕麦片",
+          "consumed": 0.1,
+          "unit": "袋"
+        },
+        {
+          "name": "香蕉",
+          "consumed": 1,
+          "unit": "根"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-26",
+      "breakfasts": [
+        {
+          "name": "豆浆粉",
+          "consumed": 1,
+          "unit": "包"
+        },
+        {
+          "name": "鸡蛋",
+          "consumed": 2,
+          "unit": "个"
+        },
+        {
+          "name": "火腿肠",
+          "consumed": 1,
+          "unit": "根"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-27",
+      "breakfasts": [
+        {
+          "name": "纯牛奶",
+          "consumed": 1,
+          "unit": "盒"
+        },
+        {
+          "name": "全麦面包",
+          "consumed": 0.5,
+          "unit": "袋"
+        },
+        {
+          "name": "香蕉",
+          "consumed": 1,
+          "unit": "根"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-28",
+      "breakfasts": [
+        {
+          "name": "酸奶",
+          "consumed": 1,
+          "unit": "杯"
+        },
+        {
+          "name": "鸡蛋",
+          "consumed": 1,
+          "unit": "个"
+        },
+        {
+          "name": "燕麦片",
+          "consumed": 0.1,
+          "unit": "袋"
+        },
+        {
+          "name": "火腿肠",
+          "consumed": 1,
+          "unit": "根"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-29",
+      "breakfasts": [
+        {
+          "name": "纯牛奶",
+          "consumed": 1,
+          "unit": "盒"
+        },
+        {
+          "name": "鸡蛋",
+          "consumed": 2,
+          "unit": "个"
+        },
+        {
+          "name": "全麦面包",
+          "consumed": 0.5,
+          "unit": "袋"
+        }
+      ]
+    },
+    {
+      "date": "2026-05-30",
+      "breakfasts": [
+        {
+          "name": "豆浆粉",
+          "consumed": 1,
+          "unit": "包"
+        },
+        {
+          "name": "香蕉",
+          "consumed": 1,
+          "unit": "根"
+        },
+        {
+          "name": "鸡蛋",
+          "consumed": 2,
+          "unit": "个"
+        }
+      ]
+    }
+  ]
 }

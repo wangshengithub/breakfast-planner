@@ -16,7 +16,7 @@ router.get('/history', (req, res) => {
 router.post('/suggest', async (req, res) => {
   try {
     // 获取用户配置
-    const user = userStorage.get();
+    const user = userStorage.get() || {};
 
     // 检查是否配置了API密钥
     if (!user.aiApiKey) {
@@ -71,7 +71,9 @@ router.post('/suggest', async (req, res) => {
     // 构建系统提示词
     let systemPrompt = '';
     if (language === 'zh') {
-      systemPrompt = `你是一位专业的营养师，根据用户的身体数据和早餐库存，提供合理的早餐建议。
+      systemPrompt = `【重要】你必须全程使用中文回复。所有建议、分析、补充建议的内容必须是中文。
+
+你是一位专业的营养师，根据用户的身体数据和早餐库存，提供合理的早餐建议。
 
 用户信息：
 - 身高：${user.height}cm
@@ -98,9 +100,12 @@ ${historyText}
 2. 考虑用户的特殊需求
 3. 如果库存不足，给出补充建议
 4. 确保早餐的多样性，尽量不要重复推荐相同的早餐
-5. 回复必须是纯JSON格式，不要包含其他文字`;
+5. 回复必须是纯JSON格式，不要包含其他文字
+6. 必须使用中文回复`;
     } else {
-      systemPrompt = `You are a professional nutritionist. Provide reasonable breakfast suggestions based on the user's body data and breakfast inventory.
+      systemPrompt = `IMPORTANT: You MUST write your entire response in English. All suggestions, analysis, and advice must be in English. Do NOT use Chinese in your response content.
+
+You are a professional nutritionist. Provide reasonable breakfast suggestions based on the user's body data and breakfast inventory.
 
 User information:
 - Height: ${user.height}cm
@@ -127,7 +132,8 @@ Notes:
 2. Consider the user's special needs
 3. If inventory is insufficient, give replenishment suggestions
 4. Ensure breakfast diversity, try to avoid recommending the same breakfast repeatedly
-5. The response must be in pure JSON format, do not include other text`;
+5. The response must be in pure JSON format, do not include other text
+6. Write ALL response text in English only`;
     }
 
     // 构建请求体
@@ -140,7 +146,8 @@ Notes:
       stream: true
     };
 
-    // 设置响应头为流式输出
+    // 所有数据准备完成后再设置流式响应头
+    // 提前设置会导致后续异常时无法切换为 JSON 错误响应
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Transfer-Encoding', 'chunked');
 
@@ -156,8 +163,14 @@ Notes:
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        res.write(`ERROR: ${errorData.error?.message || '未知错误'}`);
+        let errorMsg = '未知错误';
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error?.message || errorMsg;
+        } catch (_) {
+          // API 返回非 JSON 错误体
+        }
+        res.write(`ERROR: ${errorMsg}`);
         return res.end();
       }
 

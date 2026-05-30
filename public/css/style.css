@@ -1,4 +1,4 @@
-/* 全局样式 */
+/* ===================== 全局样式 ===================== */
 * {
   margin: 0;
   padding: 0;
@@ -7,9 +7,11 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  /* 暗色模式切换时的平滑过渡 */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* 导航按钮样式 */
+/* ===================== 导航按钮样式 ===================== */
 .nav-btn {
   color: #6b7280;
   background: transparent;
@@ -26,7 +28,17 @@ body {
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
-/* 语言切换按钮样式 */
+/* 暗色模式导航 */
+.dark .nav-btn {
+  color: #9ca3af;
+}
+
+.dark .nav-btn:hover {
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+/* ===================== 语言切换按钮样式 ===================== */
 .lang-btn {
   color: #ffffff;
   background: #4f46e5;
@@ -43,7 +55,7 @@ body {
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
-/* 页面切换动画 */
+/* ===================== 页面切换动画 ===================== */
 .page {
   display: none;
   animation: fadeIn 0.3s ease-in-out;
@@ -64,7 +76,7 @@ body {
   }
 }
 
-/* 早餐卡片样式 */
+/* ===================== 早餐卡片样式 ===================== */
 .breakfast-card {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border: 1px solid #e2e8f0;
@@ -78,6 +90,17 @@ body {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
+/* 暗色模式卡片 */
+.dark .breakfast-card {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-color: #475569;
+}
+
+.dark .breakfast-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* 低库存预警卡片 */
 .breakfast-card.alert {
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border-color: #fecaca;
@@ -87,11 +110,31 @@ body {
   color: #dc2626;
 }
 
+.dark .breakfast-card.alert {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.15) 100%);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* 已过期卡片 */
+.breakfast-card.expired {
+  background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+  border: 2px solid #f87171;
+}
+
+.dark .breakfast-card.expired {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.2) 100%);
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
 .breakfast-name {
   font-size: 1.25rem;
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 0.5rem;
+}
+
+.dark .breakfast-name {
+  color: #e2e8f0;
 }
 
 .breakfast-info {
@@ -102,6 +145,10 @@ body {
   font-size: 0.875rem;
 }
 
+.dark .breakfast-info {
+  color: #94a3b8;
+}
+
 .breakfast-info span {
   display: flex;
   align-items: center;
@@ -110,10 +157,12 @@ body {
 
 .breakfast-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1rem;
 }
 
+/* ===================== 按钮样式 ===================== */
 .btn-consume {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
@@ -159,7 +208,22 @@ body {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-/* 提示标签样式 */
+.btn-template {
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-template:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+}
+
+/* ===================== 徽章样式 ===================== */
 .alert-badge {
   display: inline-flex;
   align-items: center;
@@ -173,7 +237,55 @@ body {
   margin-top: 0.5rem;
 }
 
-/* AI建议卡片样式 */
+.dark .alert-badge {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* 过期徽章 */
+.expiry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  margin-left: 0.5rem;
+}
+
+.expiry-badge.expired {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.dark .expiry-badge.expired {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.expiry-badge.expiring-soon {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.dark .expiry-badge.expiring-soon {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.expiry-badge.fresh {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.dark .expiry-badge.fresh {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+/* ===================== AI建议卡片样式 ===================== */
 .suggestion-card {
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   border: 1px solid #bae6fd;
@@ -198,7 +310,20 @@ body {
   white-space: pre-wrap;
 }
 
-/* 历史记录样式 */
+.dark .suggestion-card {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(56, 189, 248, 0.1) 100%);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.dark .suggestion-card h4 {
+  color: #38bdf8;
+}
+
+.dark .suggestion-card p {
+  color: #cbd5e1;
+}
+
+/* ===================== 历史记录样式 ===================== */
 .history-item {
   background: #f8fafc;
   border-left: 4px solid #4f46e5;
@@ -218,7 +343,55 @@ body {
   font-size: 0.875rem;
 }
 
-/* 表单输入框样式 */
+.dark .history-item {
+  background: #1e293b;
+  border-left-color: #818cf8;
+}
+
+.dark .history-date {
+  color: #818cf8;
+}
+
+/* ===================== 模板卡片样式 ===================== */
+.template-card {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  border: 1px solid #99f6e4;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.template-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+}
+
+.dark .template-card {
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+  border-color: rgba(20, 184, 166, 0.3);
+}
+
+.template-card .template-name {
+  font-weight: 600;
+  color: #0d9488;
+  font-size: 1rem;
+}
+
+.dark .template-card .template-name {
+  color: #2dd4bf;
+}
+
+.template-card .template-info {
+  color: #64748b;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.dark .template-card .template-info {
+  color: #94a3b8;
+}
+
+/* ===================== 表单输入框样式 ===================== */
 input:focus,
 textarea:focus,
 select:focus {
@@ -226,12 +399,12 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-/* 模态框样式 */
+/* ===================== 模态框样式 ===================== */
 .modal-backdrop {
   backdrop-filter: blur(4px);
 }
 
-/* Toast消息样式 */
+/* ===================== Toast消息样式 ===================== */
 .toast {
   animation: slideIn 0.3s ease-out;
 }
@@ -247,7 +420,7 @@ select:focus {
   }
 }
 
-/* 响应式设计 */
+/* ===================== 响应式设计 ===================== */
 @media (max-width: 768px) {
   .nav-btn {
     padding: 0.75rem 1rem;
@@ -267,9 +440,14 @@ select:focus {
   .btn-delete {
     width: 100%;
   }
+
+  /* 移动端导航换行优化 */
+  nav > div {
+    justify-content: center;
+  }
 }
 
-/* 滚动条样式 */
+/* ===================== 滚动条样式 ===================== */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -285,4 +463,46 @@ select:focus {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* 暗色模式滚动条 */
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ===================== 暗色模式额外覆盖 ===================== */
+/* 确保 Tailwind CDN 的 dark: 变体无法覆盖到的元素也有暗色支持 */
+.dark .bg-gradient-to-br {
+  /* 由 body 的 dark:from/dark:to 处理 */
+}
+
+/* 历史记录卡片内部 */
+.dark .bg-gradient-to-r.from-blue-50.to-indigo-50 {
+  background: linear-gradient(to right, rgba(99, 102, 241, 0.1), rgba(129, 140, 248, 0.1));
+}
+
+.dark .border-blue-200 {
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+/* ===================== 统计页面概览卡片 hover 效果 ===================== */
+#page-stats .bg-white:hover,
+#page-stats .dark\:bg-gray-800:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+/* 图表容器在无数据时的空状态 */
+.chart-empty-text {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
 }

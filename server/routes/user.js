@@ -5,7 +5,7 @@ const { userStorage, resetAllData } = require('../utils/fileStorage');
 // 获取用户配置
 router.get('/', (req, res) => {
   try {
-    const user = userStorage.get();
+    const user = userStorage.get() || {};
     // 不返回API密钥的完整内容，只返回是否已配置
     const safeUser = {
       ...user,

@@ -1,7 +1,13 @@
-// 早餐管理模块
+/**
+ * 早餐管理模块
+ * 负责：早餐列表渲染、添加/删除/消耗/补充、保质期显示、模板保存
+ */
+
 let breakfasts = [];
 
-// 加载早餐列表
+// ==================== 加载与渲染 ====================
+
+/** 从后端加载早餐列表 */
 async function loadBreakfasts() {
   try {
     const response = await apiRequest('/api/breakfasts');
@@ -14,7 +20,44 @@ async function loadBreakfasts() {
   }
 }
 
-// 渲染早餐列表
+/**
+ * 计算保质期状态
+ * @param {string} expiryDate 保质期日期字符串 (YYYY-MM-DD)
+ * @returns {{ status: 'none'|'expired'|'expiring'|'fresh', text: string }}
+ */
+function getExpiryStatus(expiryDate) {
+  if (!expiryDate) return { status: 'none', text: '' };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expiry = new Date(expiryDate);
+  expiry.setHours(0, 0, 0, 0);
+
+  const diffMs = expiry.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  const t = translations[currentLang];
+
+  if (diffDays < 0) {
+    return {
+      status: 'expired',
+      text: `❌ ${t.breakfast.expired} (${Math.abs(diffDays)}${currentLang === 'zh' ? '天前' : ' days ago'})`
+    };
+  } else if (diffDays <= 3) {
+    return {
+      status: 'expiring',
+      text: `⚠️ ${t.breakfast.expiringSoon} (${diffDays}${t.breakfast.daysLeft})`
+    };
+  } else {
+    return {
+      status: 'fresh',
+      text: `✅ ${diffDays}${t.breakfast.daysLeft}`
+    };
+  }
+}
+
+/**
+ * 渲染早餐列表
+ */
 function renderBreakfasts() {
   const listContainer = document.getElementById('breakfast-list');
   const emptyState = document.getElementById('empty-breakfast');
@@ -27,40 +70,110 @@ function renderBreakfasts() {
   }
 
   emptyState.classList.add('hidden');
-  listContainer.innerHTML = breakfasts.map(breakfast => `
-    <div class="breakfast-card ${breakfast.isAlert ? 'alert' : ''}">
-      <div class="flex justify-between items-start">
-        <div class="flex-1">
-          <h3 class="breakfast-name">${breakfast.name}</h3>
-          <div class="breakfast-info">
-            <span>📦 ${t.breakfast.remaining}: ${breakfast.remaining}${breakfast.unit}</span>
-            <span>🍽️ ${t.breakfast.consumption}: ${breakfast.consumptionPerMeal}${breakfast.unit}</span>
-            <span>⚠️ ${t.breakfast.alertLine}: ${breakfast.alertLine}${breakfast.unit}</span>
-          </div>
-          ${breakfast.isAlert ? `
-            <div class="alert-badge">
-              <span>⚠️</span>
-              <span>${t.breakfast.alert}</span>
+  listContainer.innerHTML = breakfasts.map(breakfast => {
+    // 保质期状态
+    const expiry = getExpiryStatus(breakfast.expiryDate);
+    let expiryBadge = '';
+    if (expiry.status === 'expired') {
+      expiryBadge = `<span class="expiry-badge expired">${expiry.text}</span>`;
+    } else if (expiry.status === 'expiring') {
+      expiryBadge = `<span class="expiry-badge expiring-soon">${expiry.text}</span>`;
+    } else if (expiry.status === 'fresh') {
+      expiryBadge = `<span class="expiry-badge fresh">${expiry.text}</span>`;
+    }
+
+    // 卡片添加过期状态样式
+    const expiredClass = expiry.status === 'expired' ? ' expired' : '';
+
+    return `
+      <div class="breakfast-card ${breakfast.isAlert ? 'alert' : ''}${expiredClass}">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <h3 class="breakfast-name">${breakfast.name}</h3>
+            <div class="breakfast-info">
+              <span>📦 ${t.breakfast.remaining}: ${breakfast.remaining}${breakfast.unit}</span>
+              <span>🍽️ ${t.breakfast.consumption}: ${breakfast.consumptionPerMeal}${breakfast.unit}</span>
+              <span>⚠️ ${t.breakfast.alertLine}: ${breakfast.alertLine}${breakfast.unit}</span>
+              ${breakfast.expiryDate ? `<span>📅 ${t.breakfast.expiryDate}: ${breakfast.expiryDate}</span>` : ''}
             </div>
-          ` : ''}
+            ${breakfast.isAlert ? `
+              <div class="alert-badge">
+                <span>⚠️</span>
+                <span>${t.breakfast.alert}</span>
+              </div>
+            ` : ''}
+            ${expiryBadge}
+          </div>
+        </div>
+        <div class="breakfast-actions">
+          <button class="btn-consume" onclick="consumeBreakfast('${breakfast.id}')">
+            ${t.breakfast.consume} ${breakfast.consumptionPerMeal}${breakfast.unit}
+          </button>
+          <button class="btn-restock" onclick="restockBreakfast('${breakfast.id}')">
+            ${t.breakfast.restock}
+          </button>
+          <button class="btn-template" onclick="saveAsTemplate('${breakfast.id}')">
+            ${t.breakfast.saveAsTemplate}
+          </button>
+          <button class="btn-delete" onclick="deleteBreakfast('${breakfast.id}')">
+            ${t.breakfast.delete}
+          </button>
         </div>
       </div>
-      <div class="breakfast-actions">
-        <button class="btn-consume" onclick="consumeBreakfast('${breakfast.id}')">
-          ${t.breakfast.consume} ${breakfast.consumptionPerMeal}${breakfast.unit}
-        </button>
-        <button class="btn-restock" onclick="restockBreakfast('${breakfast.id}')">
-          🛒 ${currentLang === 'zh' ? '补充' : 'Restock'}
-        </button>
-        <button class="btn-delete" onclick="deleteBreakfast('${breakfast.id}')">
-          ${t.breakfast.delete}
-        </button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+
+  // 检查过期预警并显示横幅
+  checkExpiryBanner();
 }
 
-// 添加早餐
+// ==================== 保质期预警横幅 ====================
+
+/** 检查并显示过期预警横幅 */
+function checkExpiryBanner() {
+  const banner = document.getElementById('expiry-warning-banner');
+  const bannerContent = document.getElementById('expiry-banner-content');
+  const bannerTitle = document.getElementById('expiry-banner-title');
+  const t = translations[currentLang];
+
+  const expiredItems = breakfasts.filter(b => {
+    const status = getExpiryStatus(b.expiryDate);
+    return status.status === 'expired';
+  });
+
+  const expiringItems = breakfasts.filter(b => {
+    const status = getExpiryStatus(b.expiryDate);
+    return status.status === 'expiring';
+  });
+
+  if (expiredItems.length === 0 && expiringItems.length === 0) {
+    banner.classList.add('hidden');
+    return;
+  }
+
+  let contentParts = [];
+  if (expiredItems.length > 0) {
+    const names = expiredItems.map(b => `<strong>${b.name}</strong>`).join('、');
+    contentParts.push(`❌ ${t.breakfast.expired}: ${names}`);
+  }
+  if (expiringItems.length > 0) {
+    const names = expiringItems.map(b => `<strong>${b.name}</strong>`).join('、');
+    contentParts.push(`⚠️ ${t.breakfast.expiringSoon}: ${names}`);
+  }
+
+  bannerTitle.textContent = currentLang === 'zh'
+    ? `⏰ 保质期提醒 (${expiredItems.length + expiringItems.length}项)`
+    : `⏰ Expiry Alert (${expiredItems.length + expiringItems.length} items)`;
+  bannerContent.innerHTML = contentParts.join('<br>');
+  banner.classList.remove('hidden');
+}
+
+// ==================== 添加早餐 ====================
+
+/**
+ * 处理添加早餐表单提交
+ * @param {Event} e 表单提交事件
+ */
 async function addBreakfast(e) {
   e.preventDefault();
 
@@ -69,6 +182,25 @@ async function addBreakfast(e) {
   const unit = document.getElementById('breakfast-unit').value.trim();
   const consumption = parseFloat(document.getElementById('breakfast-consumption').value);
   const alertLine = parseFloat(document.getElementById('breakfast-alert').value);
+  const expiryDate = document.getElementById('breakfast-expiry').value || '';
+
+  // 前端校验
+  if (!name) {
+    showToast(currentLang === 'zh' ? '请输入早餐名称' : 'Please enter a name');
+    return;
+  }
+  if (!unit) {
+    showToast(currentLang === 'zh' ? '请输入单位' : 'Please enter a unit');
+    return;
+  }
+  if (isNaN(remaining) || remaining < 0) {
+    showToast(currentLang === 'zh' ? '请输入有效的剩余量' : 'Please enter a valid remaining amount');
+    return;
+  }
+  if (isNaN(consumption) || consumption <= 0) {
+    showToast(currentLang === 'zh' ? '每次消耗量必须大于0' : 'Consumption per meal must be greater than 0');
+    return;
+  }
 
   try {
     const response = await apiRequest('/api/breakfasts', {
@@ -78,7 +210,8 @@ async function addBreakfast(e) {
         remaining,
         unit,
         consumptionPerMeal: consumption,
-        alertLine
+        alertLine,
+        expiryDate
       })
     });
 
@@ -93,7 +226,12 @@ async function addBreakfast(e) {
   }
 }
 
-// 消耗早餐
+// ==================== 消耗早餐 ====================
+
+/**
+ * 消耗指定早餐
+ * @param {string} id 早餐ID
+ */
 async function consumeBreakfast(id) {
   const breakfast = breakfasts.find(b => b.id === id);
   if (!breakfast) return;
@@ -107,9 +245,7 @@ async function consumeBreakfast(id) {
   try {
     const response = await apiRequest(`/api/breakfasts/${id}/consume`, {
       method: 'POST',
-      body: JSON.stringify({
-        amount: breakfast.consumptionPerMeal
-      })
+      body: JSON.stringify({ amount: breakfast.consumptionPerMeal })
     });
 
     if (response.success) {
@@ -121,15 +257,16 @@ async function consumeBreakfast(id) {
   }
 }
 
-// 删除早餐
+// ==================== 删除早餐 ====================
+
+/**
+ * 删除指定早餐（弹出确认框）
+ * @param {string} id 早餐ID
+ */
 async function deleteBreakfast(id) {
-  const t = translations[currentLang];
-  
-  // 打开删除确认模态框
   const modal = document.getElementById('modal-delete');
   const confirmBtn = document.getElementById('btn-confirm-delete');
-  
-  // 绑定确认按钮事件
+
   confirmBtn.onclick = async () => {
     try {
       const response = await apiRequest(`/api/breakfasts/${id}`, {
@@ -145,39 +282,38 @@ async function deleteBreakfast(id) {
       showToast(error.message || (currentLang === 'zh' ? '删除失败' : 'Failed to delete'));
     }
   };
-  
-  // 显示模态框
+
   modal.classList.remove('hidden');
 }
 
-// 关闭删除确认模态框
+/** 关闭删除确认模态框 */
 function closeModalDelete() {
-  const modal = document.getElementById('modal-delete');
-  modal.classList.add('hidden');
+  document.getElementById('modal-delete').classList.add('hidden');
 }
 
-// 补充早餐
+// ==================== 补充库存 ====================
+
+/**
+ * 打开补充库存模态框
+ * @param {string} id 早餐ID
+ */
 async function restockBreakfast(id) {
   const breakfast = breakfasts.find(b => b.id === id);
   if (!breakfast) return;
 
-  // 打开补充库存模态框
   const modal = document.getElementById('modal-restock');
   const amountInput = document.getElementById('restock-amount');
-  
-  // 设置默认值为每次消耗量
+
+  // 默认补充量 = 每次消耗量
   amountInput.value = breakfast.consumptionPerMeal;
-  
-  // 显示模态框
   modal.classList.remove('hidden');
-  
-  // 绑定表单提交事件
+
   const form = document.getElementById('form-restock');
   form.onsubmit = async (e) => {
     e.preventDefault();
-    
+
     const restockAmount = parseFloat(amountInput.value);
-    
+
     if (!restockAmount || restockAmount <= 0) {
       showToast(currentLang === 'zh' ? '请输入有效的数量' : 'Please enter a valid amount');
       return;
@@ -186,9 +322,7 @@ async function restockBreakfast(id) {
     try {
       const response = await apiRequest(`/api/breakfasts/${id}/restock`, {
         method: 'POST',
-        body: JSON.stringify({
-          amount: restockAmount
-        })
+        body: JSON.stringify({ amount: restockAmount })
       });
 
       if (response.success) {
@@ -202,15 +336,15 @@ async function restockBreakfast(id) {
   };
 }
 
-// 关闭补充库存模态框
+/** 关闭补充库存模态框 */
 function closeModalRestock() {
-  const modal = document.getElementById('modal-restock');
-  const form = document.getElementById('form-restock');
-  modal.classList.add('hidden');
-  form.reset();
+  document.getElementById('modal-restock').classList.add('hidden');
+  document.getElementById('form-restock').reset();
 }
 
-// 检查库存不足的早餐并显示提醒
+// ==================== 库存不足提醒 ====================
+
+/** 检查并弹出库存不足提醒 */
 function checkLowStockAlert() {
   const lowStockItems = breakfasts.filter(b => b.isAlert);
 
@@ -221,16 +355,14 @@ function checkLowStockAlert() {
     const closeBtn = document.getElementById('btn-close-alert');
     const t = translations[currentLang];
 
-    // 更新模态框标题和按钮文本
     titleEl.textContent = t.breakfast.modal.title;
     closeBtn.textContent = t.breakfast.modal.close;
 
-    // 生成库存不足的早餐列表
     const itemsHtml = lowStockItems.map(item => `
-      <div class="flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3">
+      <div class="flex items-center justify-between bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3">
         <div>
-          <span class="font-semibold text-red-800">${item.name}</span>
-          <span class="text-red-600 text-sm ml-2">${t.breakfast.remaining}: ${item.remaining}${item.unit}</span>
+          <span class="font-semibold text-red-800 dark:text-red-400">${item.name}</span>
+          <span class="text-red-600 dark:text-red-400 text-sm ml-2">${t.breakfast.remaining}: ${item.remaining}${item.unit}</span>
         </div>
         <span class="text-red-500 text-xs">${t.breakfast.alert}</span>
       </div>
@@ -241,28 +373,56 @@ function checkLowStockAlert() {
   }
 }
 
-// 关闭库存不足提醒模态框
+/** 关闭库存不足提醒模态框 */
 function closeModalAlert() {
-  const modal = document.getElementById('modal-alert');
-  modal.classList.add('hidden');
+  document.getElementById('modal-alert').classList.add('hidden');
 }
 
-// 页面加载时获取早餐列表
+// ==================== 保存为模板 ====================
+
+/**
+ * 将早餐项保存为常用模板
+ * @param {string} id 早餐ID
+ */
+async function saveAsTemplate(id) {
+  const breakfast = breakfasts.find(b => b.id === id);
+  if (!breakfast) return;
+
+  const t = translations[currentLang];
+
+  try {
+    const response = await apiRequest('/api/templates', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: breakfast.name,
+        unit: breakfast.unit,
+        consumptionPerMeal: breakfast.consumptionPerMeal,
+        alertLine: breakfast.alertLine
+      })
+    });
+
+    if (response.success) {
+      showToast(t.template.saveSuccess);
+    }
+  } catch (error) {
+    // 如果是同名重复，后端会返回具体错误
+    showToast(error.message || (currentLang === 'zh' ? '保存模板失败' : 'Failed to save template'));
+  }
+}
+
+// ==================== 事件绑定 ====================
+
 document.addEventListener('DOMContentLoaded', () => {
+  // 加载早餐列表，然后检查库存不足
   loadBreakfasts().then(() => {
-    // 加载完成后检查库存不足
     setTimeout(checkLowStockAlert, 500);
   });
-  
-  // 绑定表单提交事件
+
+  // 添加早餐表单提交
   document.getElementById('form-add-breakfast').addEventListener('submit', addBreakfast);
-  
-  // 绑定取消补充按钮事件
+
+  // 各模态框关闭按钮
   document.getElementById('btn-cancel-restock').addEventListener('click', closeModalRestock);
-  
-  // 绑定删除取消按钮事件
   document.getElementById('btn-cancel-delete').addEventListener('click', closeModalDelete);
-  
-  // 绑定关闭提醒按钮事件
   document.getElementById('btn-close-alert').addEventListener('click', closeModalAlert);
 });

@@ -1,10 +1,10 @@
 {
   "height": 175,
   "weight": 70,
-  "age": 30,
+  "age": 28,
   "gender": "male",
-  "specialNeeds": "",
+  "specialNeeds": "减脂期，需要高蛋白低碳水",
   "aiApiKey": "",
   "aiApiUrl": "https://api.deepseek.com/v1/chat/completions",
-  "aiModel": "deepseek-chat"
+  "aiModel": "deepseek-v4-pro"
 }

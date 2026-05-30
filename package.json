@@ -1,7 +1,7 @@
 {
   "name": "breakfast-manager",
-  "version": "1.0.0",
-  "description": "早餐管理应用 - 库存管理和AI智能建议",
+  "version": "2.0.0",
+  "description": "早餐管理应用 - 智能库存管理、AI营养建议、数据统计、保质期提醒、暗色模式",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
@@ -11,13 +11,18 @@
     "breakfast",
     "management",
     "ai",
-    "nodejs"
+    "inventory",
+    "nutrition",
+    "nodejs",
+    "chart.js",
+    "dark-mode"
   ],
-  "author": "",
+  "author": "wangshengithub",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "chart.js": "^4.5.1",
     "cors": "^2.8.5",
-    "body-parser": "^1.20.2"
+    "express": "^4.18.2"
   }
 }

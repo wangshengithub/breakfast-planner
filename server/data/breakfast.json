@@ -1,3 +1,84 @@
 {
-  "breakfasts": []
+  "breakfasts": [
+    {
+      "id": "1001",
+      "name": "纯牛奶",
+      "remaining": 8,
+      "unit": "盒",
+      "consumptionPerMeal": 1,
+      "alertLine": 3,
+      "isAlert": false,
+      "expiryDate": "2026-06-15"
+    },
+    {
+      "id": "1002",
+      "name": "全麦面包",
+      "remaining": 2,
+      "unit": "袋",
+      "consumptionPerMeal": 0.5,
+      "alertLine": 2,
+      "isAlert": true,
+      "expiryDate": "2026-06-03"
+    },
+    {
+      "id": "1003",
+      "name": "鸡蛋",
+      "remaining": 15,
+      "unit": "个",
+      "consumptionPerMeal": 2,
+      "alertLine": 5,
+      "isAlert": false,
+      "expiryDate": "2026-06-20"
+    },
+    {
+      "id": "1004",
+      "name": "酸奶",
+      "remaining": 4,
+      "unit": "杯",
+      "consumptionPerMeal": 1,
+      "alertLine": 3,
+      "isAlert": false,
+      "expiryDate": "2026-06-01"
+    },
+    {
+      "id": "1005",
+      "name": "燕麦片",
+      "remaining": 1,
+      "unit": "袋",
+      "consumptionPerMeal": 0.1,
+      "alertLine": 1,
+      "isAlert": true,
+      "expiryDate": "2026-08-30"
+    },
+    {
+      "id": "1006",
+      "name": "火腿肠",
+      "remaining": 6,
+      "unit": "根",
+      "consumptionPerMeal": 1,
+      "alertLine": 3,
+      "isAlert": false,
+      "expiryDate": "2026-07-10"
+    },
+    {
+      "id": "1007",
+      "name": "豆浆粉",
+      "remaining": 10,
+      "unit": "包",
+      "consumptionPerMeal": 1,
+      "alertLine": 3,
+      "isAlert": false,
+      "expiryDate": "2026-12-01"
+    },
+    {
+      "id": "1008",
+      "name": "香蕉",
+      "remaining": 3,
+      "unit": "根",
+      "consumptionPerMeal": 1,
+      "alertLine": 2,
+      "isAlert": false,
+      "expiryDate": "2026-06-02"
+    }
+  ]
 }

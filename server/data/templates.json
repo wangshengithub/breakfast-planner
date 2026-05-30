@@ -1,0 +1,36 @@
+{
+  "templates": [
+    {
+      "id": "2001",
+      "name": "纯牛奶",
+      "unit": "盒",
+      "consumptionPerMeal": 1,
+      "alertLine": 3,
+      "createdAt": "2026-05-30T12:50:26.420Z"
+    },
+    {
+      "id": "2002",
+      "name": "全麦面包",
+      "unit": "袋",
+      "consumptionPerMeal": 0.5,
+      "alertLine": 2,
+      "createdAt": "2026-05-30T12:50:26.420Z"
+    },
+    {
+      "id": "2003",
+      "name": "鸡蛋",
+      "unit": "个",
+      "consumptionPerMeal": 2,
+      "alertLine": 5,
+      "createdAt": "2026-05-30T12:50:26.420Z"
+    },
+    {
+      "id": "2004",
+      "name": "酸奶",
+      "unit": "杯",
+      "consumptionPerMeal": 1,
+      "alertLine": 3,
+      "createdAt": "2026-05-30T12:50:26.420Z"
+    }
+  ]
+}

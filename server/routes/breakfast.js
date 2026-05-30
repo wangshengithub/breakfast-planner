@@ -12,10 +12,10 @@ router.get('/', (req, res) => {
   }
 });
 
-// 添加早餐
+// 添加早餐（支持可选的 expiryDate 字段）
 router.post('/', (req, res) => {
   try {
-    const { name, remaining, unit, consumptionPerMeal, alertLine } = req.body;
+    const { name, remaining, unit, consumptionPerMeal, alertLine, expiryDate } = req.body;
 
     // 验证必填字段
     if (!name || remaining === undefined || !unit || consumptionPerMeal === undefined || alertLine === undefined) {
@@ -27,12 +27,18 @@ router.post('/', (req, res) => {
       return res.status(400).json({ success: false, message: '数值输入不正确' });
     }
 
+    // 验证保质期日期格式（如果提供了的话）
+    if (expiryDate && isNaN(Date.parse(expiryDate))) {
+      return res.status(400).json({ success: false, message: '保质期日期格式不正确' });
+    }
+
     const breakfast = {
-      name,
+      name: name.trim(),
       remaining: parseFloat(remaining),
-      unit,
+      unit: unit.trim(),
       consumptionPerMeal: parseFloat(consumptionPerMeal),
-      alertLine: parseFloat(alertLine)
+      alertLine: parseFloat(alertLine),
+      expiryDate: expiryDate || ''
     };
 
     const success = breakfastStorage.add(breakfast);
@@ -46,11 +52,11 @@ router.post('/', (req, res) => {
   }
 });
 
-// 更新早餐
+// 更新早餐（支持 expiryDate 字段）
 router.put('/:id', (req, res) => {
   try {
     const { id } = req.params;
-    const { name, remaining, unit, consumptionPerMeal, alertLine } = req.body;
+    const { name, remaining, unit, consumptionPerMeal, alertLine, expiryDate } = req.body;
 
     // 验证数值
     if (remaining !== undefined && remaining < 0) {
@@ -63,18 +69,20 @@ router.put('/:id', (req, res) => {
       return res.status(400).json({ success: false, message: '提醒线不能为负数' });
     }
 
-    const updates = {};
-    if (name !== undefined) updates.name = name;
-    if (remaining !== undefined) updates.remaining = parseFloat(remaining);
-    if (unit !== undefined) updates.unit = unit;
-    if (consumptionPerMeal !== undefined) updates.consumptionPerMeal = parseFloat(consumptionPerMeal);
-    if (alertLine !== undefined) updates.alertLine = parseFloat(alertLine);
-
-    // 更新提醒状态
-    if (remaining !== undefined && alertLine !== undefined) {
-      updates.isAlert = remaining <= alertLine;
+    // 验证保质期日期格式
+    if (expiryDate !== undefined && expiryDate !== '' && isNaN(Date.parse(expiryDate))) {
+      return res.status(400).json({ success: false, message: '保质期日期格式不正确' });
     }
 
+    const updates = {};
+    if (name !== undefined) updates.name = name.trim();
+    if (remaining !== undefined) updates.remaining = parseFloat(remaining);
+    if (unit !== undefined) updates.unit = unit.trim();
+    if (consumptionPerMeal !== undefined) updates.consumptionPerMeal = parseFloat(consumptionPerMeal);
+    if (alertLine !== undefined) updates.alertLine = parseFloat(alertLine);
+    if (expiryDate !== undefined) updates.expiryDate = expiryDate;
+
+    // isAlert 在 breakfastStorage.update() 内部自动计算，无需在此处理
     const success = breakfastStorage.update(id, updates);
     if (success) {
       res.json({ success: true, message: '更新成功' });
@@ -115,47 +123,41 @@ router.post('/:id/consume', (req, res) => {
     // 获取早餐信息用于记录历史
     const breakfasts = breakfastStorage.getAll();
     const breakfast = breakfasts.find(b => b.id === id);
-    
+
     if (!breakfast) {
       return res.status(404).json({ success: false, message: '早餐不存在' });
     }
 
     const success = breakfastStorage.consume(id, consumeAmount);
     if (success) {
-      // 直接更新历史记录中的对应早餐项，而不是重新添加
+      // 更新历史记录
       const records = historyStorage.getAll();
       const today = new Date().toISOString().split('T')[0];
-      
-      // 查找今天的记录
+
       const todayRecord = records.find(r => r.date === today);
-      
+
       if (todayRecord) {
-        // 查找今天是否已消耗过这个早餐
         const existingBreakfast = todayRecord.breakfasts.find(b => b.name === breakfast.name);
-        
+
         if (existingBreakfast) {
-          // 如果已消耗过，累加消耗量
           existingBreakfast.consumed += consumeAmount;
         } else {
-          // 如果没有消耗过，添加新记录
           todayRecord.breakfasts.push({
             name: breakfast.name,
             consumed: consumeAmount,
             unit: breakfast.unit
           });
         }
-        
-        // 保存更新后的记录
+
         historyStorage.addToday(todayRecord.breakfasts);
       } else {
-        // 如果今天还没有记录，创建新记录
         historyStorage.addToday([{
           name: breakfast.name,
           consumed: consumeAmount,
           unit: breakfast.unit
         }]);
       }
-      
+
       res.json({ success: true, message: '消耗成功' });
     } else {
       res.status(404).json({ success: false, message: '早餐不存在' });
@@ -178,7 +180,7 @@ router.post('/:id/restock', (req, res) => {
 
     const breakfasts = breakfastStorage.getAll();
     const breakfast = breakfasts.find(b => b.id === id);
-    
+
     if (!breakfast) {
       return res.status(404).json({ success: false, message: '早餐不存在' });
     }

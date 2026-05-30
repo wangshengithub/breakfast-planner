@@ -1,7 +1,14 @@
-// AI建议模块
+/**
+ * AI建议模块
+ * 负责：获取AI建议（流式输出）、渲染建议卡片
+ * 历史记录的加载/渲染函数保留供 stats.js 调用
+ */
+
 let currentSuggestion = null;
 
-// 加载历史记录
+// ==================== 历史记录 ====================
+
+/** 从后端加载历史记录 */
 async function loadHistory() {
   try {
     const response = await apiRequest('/api/ai/history');
@@ -13,44 +20,18 @@ async function loadHistory() {
   }
 }
 
-// 渲染完整建议内容
-function renderFullSuggestion() {
-  const contentState = document.getElementById('suggestion-content');
-  const t = translations[currentLang];
-  
-  contentState.innerHTML = `
-    <!-- 今日建议 -->
-    <div class="suggestion-card">
-      <h4>🍳 ${t.ai.suggestion}</h4>
-      <p class="whitespace-pre-wrap">${currentSuggestion.suggestion || '暂无建议'}</p>
-    </div>
-
-    <!-- 营养分析 -->
-    ${currentSuggestion.nutrition ? `
-      <div class="suggestion-card">
-        <h4>📊 ${t.ai.nutrition}</h4>
-        <p class="whitespace-pre-wrap">${currentSuggestion.nutrition}</p>
-      </div>
-    ` : ''}
-
-    <!-- 库存补充建议 -->
-    ${currentSuggestion.restock ? `
-      <div class="suggestion-card">
-        <h4>🛒 ${t.ai.restock}</h4>
-        <p class="whitespace-pre-wrap">${currentSuggestion.restock}</p>
-      </div>
-    ` : ''}
-  `;
-}
-
-// 渲染历史记录
+/**
+ * 渲染历史记录列表
+ * @param {Array} records 历史记录数组
+ */
 function renderHistory(records) {
   const historyContainer = document.getElementById('history-list');
+  if (!historyContainer) return;
   const t = translations[currentLang];
-  
+
   if (!records || records.length === 0) {
     historyContainer.innerHTML = `
-      <div class="text-center py-8 text-gray-400">
+      <div class="text-center py-8 text-gray-400 dark:text-gray-500">
         <div class="text-4xl mb-2">📅</div>
         <p>${t.ai.noHistory}</p>
       </div>
@@ -68,37 +49,68 @@ function renderHistory(records) {
   });
 
   historyContainer.innerHTML = Object.entries(groupedRecords).map(([date, breakfasts]) => {
-    // 将同一天的早餐合并显示
-    const breakfastText = breakfasts.map(b => 
+    const breakfastText = breakfasts.map(b =>
       `${b.name}${b.consumed}${b.unit}`
     ).join('、');
-    
+
     return `
-      <div class="bg-white rounded-xl shadow-md p-6 mb-4">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-4 transition-colors duration-300">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-bold text-gray-800">${date}</h3>
-          <span class="text-sm text-gray-500">${breakfasts.length} ${t.ai.items}</span>
+          <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">${date}</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400">${breakfasts.length} ${t.ai.items}</span>
         </div>
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-          <div class="font-medium text-gray-800">${breakfastText}</div>
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+          <div class="font-medium text-gray-800 dark:text-gray-200">${breakfastText}</div>
         </div>
       </div>
     `;
   }).join('');
 }
 
-// 获取AI建议（流式输出）
+// ==================== AI建议 ====================
+
+/** 渲染完整建议内容（流式结束后或已有建议时使用） */
+function renderFullSuggestion() {
+  const contentState = document.getElementById('suggestion-content');
+  const t = translations[currentLang];
+  const noSuggestion = currentLang === 'zh' ? '暂无建议' : 'No suggestion';
+
+  contentState.innerHTML = `
+    <div class="suggestion-card">
+      <h4>🍳 ${t.ai.suggestion}</h4>
+      <p class="whitespace-pre-wrap">${currentSuggestion.suggestion || noSuggestion}</p>
+    </div>
+
+    ${currentSuggestion.nutrition ? `
+      <div class="suggestion-card">
+        <h4>📊 ${t.ai.nutrition}</h4>
+        <p class="whitespace-pre-wrap">${currentSuggestion.nutrition}</p>
+      </div>
+    ` : ''}
+
+    ${currentSuggestion.restock ? `
+      <div class="suggestion-card">
+        <h4>🛒 ${t.ai.restock}</h4>
+        <p class="whitespace-pre-wrap">${currentSuggestion.restock}</p>
+      </div>
+    ` : ''}
+  `;
+}
+
+/**
+ * 获取AI建议（流式输出）
+ */
 async function getSuggestion() {
   const emptyState = document.getElementById('empty-suggestion');
   const loadingState = document.getElementById('loading-suggestion');
   const contentState = document.getElementById('suggestion-content');
+  const t = translations[currentLang];
 
   // 显示加载状态
   emptyState.classList.add('hidden');
   contentState.classList.add('hidden');
   loadingState.classList.remove('hidden');
 
-  // 初始化建议内容
   currentSuggestion = {
     suggestion: '',
     nutrition: '',
@@ -115,17 +127,17 @@ async function getSuggestion() {
     });
 
     if (!response.ok) {
-      throw new Error('请求失败');
+      throw new Error(currentLang === 'zh' ? '请求失败' : 'Request failed');
     }
 
     // 切换到内容显示状态
     loadingState.classList.add('hidden');
     contentState.classList.remove('hidden');
 
-    // 初始化内容区域
+    // 流式输出占位
     contentState.innerHTML = `
       <div class="suggestion-card">
-        <h4>🍳 今日早餐建议</h4>
+        <h4>🍳 ${t.ai.suggestion}</h4>
         <p id="stream-suggestion" class="whitespace-pre-wrap"></p>
       </div>
     `;
@@ -158,7 +170,6 @@ async function getSuggestion() {
 
     // 流式输出完成后，尝试解析JSON
     try {
-      // 尝试提取JSON部分
       const jsonMatch = buffer.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
@@ -168,72 +179,22 @@ async function getSuggestion() {
           restock: parsed.restock || ''
         };
       } else {
-        currentSuggestion = {
-          suggestion: buffer,
-          nutrition: '',
-          restock: ''
-        };
+        currentSuggestion = { suggestion: buffer, nutrition: '', restock: '' };
       }
-      
-      // 重新渲染完整内容
       renderFullSuggestion();
     } catch (error) {
-      // 解析失败，保持纯文本
-      currentSuggestion = {
-        suggestion: buffer,
-        nutrition: '',
-        restock: ''
-      };
+      currentSuggestion = { suggestion: buffer, nutrition: '', restock: '' };
       renderFullSuggestion();
     }
 
   } catch (error) {
     console.error('获取建议错误:', error);
-    showToast(error.message || '获取建议失败');
+    showToast(error.message || (currentLang === 'zh' ? '获取建议失败' : 'Failed to get suggestion'));
     loadingState.classList.add('hidden');
     emptyState.classList.remove('hidden');
   }
 }
 
-// 渲染建议内容
-function renderSuggestion() {
-  const emptyState = document.getElementById('empty-suggestion');
-  const loadingState = document.getElementById('loading-suggestion');
-  const contentState = document.getElementById('suggestion-content');
+// ==================== 事件绑定 ====================
 
-  loadingState.classList.add('hidden');
-  emptyState.classList.add('hidden');
-  contentState.classList.remove('hidden');
-
-  contentState.innerHTML = `
-    <!-- 今日建议 -->
-    <div class="suggestion-card">
-      <h4>🍳 今日早餐建议</h4>
-      <p>${currentSuggestion.suggestion || '暂无建议'}</p>
-    </div>
-
-    <!-- 营养分析 -->
-    ${currentSuggestion.nutrition ? `
-      <div class="suggestion-card">
-        <h4>📊 营养分析</h4>
-        <p>${currentSuggestion.nutrition}</p>
-      </div>
-    ` : ''}
-
-    <!-- 库存补充建议 -->
-    ${currentSuggestion.restock ? `
-      <div class="suggestion-card">
-        <h4>🛒 库存补充建议</h4>
-        <p>${currentSuggestion.restock}</p>
-      </div>
-    ` : ''}
-  `;
-}
-
-// 绑定获取建议按钮事件
 document.getElementById('btn-get-suggestion').addEventListener('click', getSuggestion);
-
-// 页面加载时获取历史记录
-document.addEventListener('DOMContentLoaded', () => {
-  loadHistory();
-});

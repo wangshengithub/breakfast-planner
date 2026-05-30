@@ -6,9 +6,9 @@
 
 ## 📖 Project Overview
 
-A local breakfast management application based on Node.js, supporting inventory management and AI intelligent suggestion features. Help you scientifically manage your breakfast inventory and get nutritional recommendations based on your personal body data.
+A local breakfast management application based on Node.js, featuring smart inventory management, AI nutritional suggestions, data statistics, and expiry date tracking. Manage your breakfast inventory scientifically and get personalized nutrition recommendations based on your body data.
 
-![Node.js](https://img.shields.io/badge/Node.js-14%2B-green) ![License](https://img.shields.io/badge/License-MIT-blue) ![GitHub Stars](https://img.shields.io/github/stars/wangshengithub/breakfast-manager?style=social)
+![Node.js](https://img.shields.io/badge/Node.js-14%2B-green) ![License](https://img.shields.io/badge/License-MIT-blue) ![Version](https://img.shields.io/badge/Version-2.0.0-blue)
 
 ---
 
@@ -16,53 +16,62 @@ A local breakfast management application based on Node.js, supporting inventory 
 
 ### 📦 Inventory Management
 
-- Add, delete, and edit breakfast items
-- Quick consume/restock inventory
-- Smart alert line settings
-- Low stock warnings
-- Support for multiple units
+- Add, delete breakfast items with quick consume/restock
+- Smart alert line settings with automatic low-stock warnings
+- **Expiry Date Tracking**: Set expiry dates, auto-alert for expired/expiring items
+- Support for multiple units (boxes, bags, pieces, cups, etc.)
+- **Templates**: Save frequently used breakfasts as templates for one-click quick add
+
+### 📊 Data Statistics
+
+- Four overview metrics: total items, total stock, low stock, expiring soon
+- 7-day consumption trend chart (line chart)
+- Category consumption breakdown (doughnut chart)
+- Inventory overview (horizontal bar chart, color-coded by status)
+- Recent 30-day breakfast consumption history
+
+> Charts use Chart.js served locally — no external CDN required. Page content renders first.
 
 ### 🤖 AI Smart Suggestions
 
 - Personalized analysis based on body data (height, weight, age, gender)
-- Generate recommendations based on current inventory
-- Nutritional analysis and advice
-- Inventory restock reminders
+- Recommendations generated from current inventory and consumption history
+- Nutritional analysis and restock reminders
 - Streaming output with real-time display
 
-### ⚙️ User Settings
+### 🌙 Dark Mode
 
-- Personal body data management
-- Custom AI API configuration (OpenAI compatible)
-- Support for special dietary needs (weight loss, lactose-free, etc.)
-- Data reset functionality
+- One-click toggle between light/dark themes
+- Automatically follows system preference
+- Remembers user choice across sessions
 
 ### 💾 Data Management
 
-- Local JSON file storage
-- Automatically keep last 7 days of history
-- Auto-merge breakfasts from the same day
-- Support for data export and backup
+- **Data Export**: One-click export all data as a JSON backup file
+- **Data Import**: Restore from backup file (preview before overwriting)
+- **Templates**: Quickly save, use, and delete breakfast templates
+- History records automatically kept for the last 30 days
 
 ### 🎨 User Experience
 
 - Modern UI design (Tailwind CSS)
 - Responsive layout, mobile-friendly
 - Chinese/English bilingual interface
-- Smooth animation effects
-- Intuitive operation feedback
+- Smooth page transition animations
+- Intuitive Toast notifications
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Category         | Technology                                       |
-| ---------------- | ------------------------------------------------ |
-| **Backend**      | Node.js + Express                                |
-| **Frontend**     | HTML5 + CSS3 + Vanilla JavaScript + Tailwind CSS |
-| **Data Storage** | Local JSON files                                 |
-| **AI Service**   | DeepSeek API (OpenAI compatible)                 |
-| **HTTP Client**  | Fetch API                                        |
+| Category         | Technology                                                 |
+| ---------------- | ---------------------------------------------------------- |
+| **Runtime**      | Node.js 14+                                                |
+| **Backend**      | Express 4.18                                               |
+| **Frontend**     | HTML5 + CSS3 + Vanilla JavaScript + Tailwind CSS           |
+| **Charts**       | Chart.js 4.x (npm installed, served locally, lazy-loaded)  |
+| **Data Storage** | Local JSON files                                           |
+| **AI Service**   | DeepSeek API (OpenAI compatible, default: deepseek-v4-pro) |
 
 ---
 
@@ -71,28 +80,33 @@ A local breakfast management application based on Node.js, supporting inventory 
 ```
 breakfast-manager/
 ├── server/                       # Backend code
-│   ├── server.js                 # Express main server
+│   ├── server.js                 # Express server (routes + error handling)
 │   ├── routes/                   # API routes
-│   │   ├── breakfast.js          # Breakfast management API
+│   │   ├── breakfast.js          # Breakfast management API (with expiry dates)
 │   │   ├── user.js               # User configuration API
-│   │   └── ai.js                 # AI suggestion API
-│   ├── data/                     # Data storage
+│   │   ├── ai.js                 # AI suggestion API (streaming)
+│   │   ├── data.js               # Data export/import + stats API
+│   │   └── template.js           # Template management API
+│   ├── data/                     # Data storage (auto-created)
 │   │   ├── breakfast.json        # Breakfast inventory data
 │   │   ├── user.json             # User configuration data
-│   │   └── history.json          # History records
-│   └── utils/                    # Utility functions
-│       └── fileStorage.js        # File operations wrapper
+│   │   ├── history.json          # Consumption history (kept 30 days)
+│   │   └── templates.json        # Breakfast templates
+│   └── utils/
+│       └── fileStorage.js        # File I/O + CRUD abstractions
 ├── public/                       # Frontend static files
 │   ├── index.html                # Main page
 │   ├── css/
-│   │   └── style.css             # Custom styles
+│   │   └── style.css             # Custom styles + dark mode
 │   └── js/
-│       ├── app.js                # Main app logic
-│       ├── breakfast.js          # Breakfast management module
-│       ├── user.js               # User configuration module
-│       └── ai.js                 # AI suggestion module
-├── package.json                  # Project configuration
-└── README.md                     # Documentation
+│       ├── app.js                # Core module (routing, i18n, dark mode, Chart.js lazy-load)
+│       ├── breakfast.js          # Breakfast management (expiry display, template save)
+│       ├── stats.js              # Stats dashboard (lazy-loads Chart.js)
+│       ├── templates.js          # Template management
+│       ├── user.js               # User settings + data export/import
+│       └── ai.js                 # AI suggestions + history rendering
+├── package.json
+└── README.md
 ```
 
 ---
@@ -103,7 +117,6 @@ breakfast-manager/
 
 - **Node.js**: v14 or higher
 - **npm**: v6 or higher
-- **OS**: Windows / macOS / Linux
 
 ### Installation
 
@@ -120,16 +133,17 @@ cd breakfast-manager
 npm install
 ```
 
-#### 3️⃣ Configure AI API (Optional)
+#### 3️⃣ Configure AI API
 
-To use AI suggestion features, configure DeepSeek API:
+To use AI suggestion features:
 
-1. Visit [DeepSeek Platform](https://platform.deepseek.com/) to register
-2. Get your API key
-3. After starting the app, fill in API settings on "User Settings" page:
-   - **API Key**: Your DeepSeek API Key
-   - **API URL**: `https://api.deepseek.com/v1/chat/completions`
-   - **Model Name**: `deepseek-chat`or`deepseek-reasoner`
+1. Visit [DeepSeek Platform](https://platform.deepseek.com/) to register and get your API key
+2. After starting the app, fill in the "⚙️ Settings" page:
+   - **API Key**: Your API Key
+   - **API URL**: `https://api.deepseek.com/v1/chat/completions` (default)
+   - **Model Name**: `deepseek-v4-pro` (default) / `deepseek-v4-flash` / or any compatible model
+
+> The model name is a text input field — you can freely type any model name, not limited to a dropdown.
 
 #### 4️⃣ Start the Application
 
@@ -139,75 +153,48 @@ npm start
 
 After successful startup, visit: **http://localhost:3000**
 
+Port can be configured via environment variable: `PORT=8080 npm start`
+
 ---
 
 ## 📖 User Guide
 
-### 1️⃣ Inventory Management
+### Inventory Management
 
-#### Add Breakfast
+1. Click "+ Add Breakfast" to manually add, or "⭐ From Template" for quick creation
+2. Optionally set an "Expiry Date" — the system will auto-alert for expired/expiring items
+3. Click "⭐ Save Template" on any card to save as a reusable template
+4. Consume, restock, or delete with one click
+5. Automatic low-stock alerts when below the alert line
 
-1. Click "Add Breakfast" button
-2. Fill in breakfast information:
-   - Breakfast name (e.g., milk, bread)
-   - Remaining quantity (e.g., 10)
-   - Unit (e.g., box, bag, piece)
-   - Consumption per meal (e.g., 1)
-   - Alert line (e.g., 3)
-3. Click "Add"
+### Statistics Dashboard
 
-#### Manage Inventory
+Switch to the "📊 Stats" page to view:
 
-- **Consume**: Click "Consume" button to reduce inventory
-- **Restock**: Click "Restock" button to increase inventory
-- **Edit**: Modify breakfast information
-- **Delete**: Remove unwanted breakfast items
+- Four overview metrics at the top
+- 7-day consumption trend line chart
+- Category breakdown doughnut chart
+- Inventory overview horizontal bar chart
+- Recent breakfast consumption history
 
-#### Low Stock Alerts
+> Chart.js loads in the background on first visit to the Stats page — no impact on browsing.
 
-When inventory is below the alert line, the system will:
+### AI Breakfast Suggestions
 
-- Display red warning indicator
-- Show alert dialog
-- Suggest timely restocking
+1. Complete user body data configuration
+2. Configure your AI API key
+3. Click "✨ Get Suggestion" — AI generates recommendations in real-time via streaming
 
-### 2️⃣ AI Breakfast Suggestions
+### Data Backup & Restore
 
-#### Get Suggestions
+At the bottom of the "⚙️ Settings" page:
 
-1. Complete user body data configuration (height, weight, age, gender)
-2. Ensure AI API is correctly configured
-3. Click "Get Suggestion" button
-4. AI will generate personalized recommendations in real-time
+- **📥 Export Data**: Download a JSON file containing all data
+- **📤 Import Data**: Select a backup file, preview contents, then confirm import (overwrites current data)
 
-#### Suggestion Content
+### Dark Mode
 
-- Today's breakfast combination suggestions
-- Nutritional analysis
-- Inventory restock recommendations
-- Special dietary considerations
-
-### 3️⃣ User Settings
-
-#### Basic Information
-
-- **Height** (cm)
-- **Weight** (kg)
-- **Age**
-- **Gender**
-- **Special Needs** (e.g., weight loss period, muscle gain, lactose-free, low sugar)
-
-#### AI Configuration
-
-- **API Key**: DeepSeek API Key
-- **API URL**: Support OpenAI-compatible format
-- **Model Name**: Customizable model
-
-#### Data Management
-
-- **Save User Info**: Save personal basic data
-- **Save AI Config**: Save API settings
-- **Reset All Data**: Clear all data (confirmation required)
+Click the 🌙 / ☀️ button in the navigation bar to toggle. The system remembers your preference and follows the system theme.
 
 ---
 
@@ -215,30 +202,46 @@ When inventory is below the alert line, the system will:
 
 ### Breakfast Management API
 
-| Method | Path                          | Description        |
-| ------ | ----------------------------- | ------------------ |
-| GET    | `/api/breakfasts`             | Get all breakfasts |
-| POST   | `/api/breakfasts`             | Add new breakfast  |
-| PUT    | `/api/breakfasts/:id`         | Update breakfast   |
-| DELETE | `/api/breakfasts/:id`         | Delete breakfast   |
-| POST   | `/api/breakfasts/:id/consume` | Consume breakfast  |
-| POST   | `/api/breakfasts/:id/restock` | Restock breakfast  |
+| Method | Path                          | Description                                     |
+| ------ | ----------------------------- | ----------------------------------------------- |
+| GET    | `/api/breakfasts`             | Get all breakfasts                              |
+| POST   | `/api/breakfasts`             | Add new breakfast (supports `expiryDate` field) |
+| PUT    | `/api/breakfasts/:id`         | Update breakfast info                           |
+| DELETE | `/api/breakfasts/:id`         | Delete breakfast                                |
+| POST   | `/api/breakfasts/:id/consume` | Consume breakfast (also records history)        |
+| POST   | `/api/breakfasts/:id/restock` | Restock breakfast                               |
 
 ### User Configuration API
 
-| Method | Path              | Description               |
-| ------ | ----------------- | ------------------------- |
-| GET    | `/api/user`       | Get user configuration    |
-| PUT    | `/api/user`       | Update user configuration |
-| POST   | `/api/user/reset` | Reset all data            |
+| Method | Path              | Description                                 |
+| ------ | ----------------- | ------------------------------------------- |
+| GET    | `/api/user`       | Get user config (API key masked)            |
+| PUT    | `/api/user`       | Update user config                          |
+| POST   | `/api/user/reset` | Reset all data (requires `confirm: "true"`) |
 
 ### AI Suggestion API
 
-| Method | Path              | Description                              |
-| ------ | ----------------- | ---------------------------------------- |
-| GET    | `/api/ai/history` | Get history records                      |
-| POST   | `/api/ai/suggest` | Get AI breakfast suggestions (streaming) |
-| POST   | `/api/ai/record`  | Record today's breakfast                 |
+| Method | Path              | Description                                  |
+| ------ | ----------------- | -------------------------------------------- |
+| GET    | `/api/ai/history` | Get last 3 days of history                   |
+| POST   | `/api/ai/suggest` | Get AI breakfast suggestions (streaming SSE) |
+| POST   | `/api/ai/record`  | Manually record today's breakfast            |
+
+### Data Management API
+
+| Method | Path                | Description                           |
+| ------ | ------------------- | ------------------------------------- |
+| GET    | `/api/data/export`  | Export all data as JSON file download |
+| POST   | `/api/data/import`  | Import data (overwrites current data) |
+| GET    | `/api/data/summary` | Get statistics summary                |
+
+### Template Management API
+
+| Method | Path                 | Description                              |
+| ------ | -------------------- | ---------------------------------------- |
+| GET    | `/api/templates`     | Get all templates                        |
+| POST   | `/api/templates`     | Add template (auto-deduplicates by name) |
+| DELETE | `/api/templates/:id` | Delete template                          |
 
 ---
 
@@ -246,28 +249,45 @@ When inventory is below the alert line, the system will:
 
 All data is stored in the `server/data/` directory:
 
-| File             | Description                   | Example                                      |
-| ---------------- | ----------------------------- | -------------------------------------------- |
-| `breakfast.json` | Breakfast inventory data      | `{"id": 1, "name": "milk", "remaining": 10}` |
-| `user.json`      | User configuration data       | `{"height": 175, "weight": 70}`              |
-| `history.json`   | History records (last 7 days) | `{"2026-03-29": ["milk", "bread"]}`          |
+| File             | Description                             | Retention    |
+| ---------------- | --------------------------------------- | ------------ |
+| `breakfast.json` | Breakfast inventory (with expiry dates) | Permanent    |
+| `user.json`      | User config + AI settings               | Permanent    |
+| `history.json`   | Consumption history                     | Last 30 days |
+| `templates.json` | Breakfast templates                     | Permanent    |
+
+### 📋 Sample Data
+
+The project comes with sample data so you can experience all features immediately without manual setup:
+
+**Inventory (8 items)**
+
+| Name | Remaining | Unit | Expiry Date | Status |
+|---|---|---|---|---|
+| 纯牛奶 (Milk) | 8 | boxes | 06-15 | Normal |
+| 全麦面包 (Bread) | 2 | bags | 06-03 | ⚠️ Low Stock |
+| 鸡蛋 (Eggs) | 15 | pieces | 06-20 | Normal |
+| 酸奶 (Yogurt) | 4 | cups | 06-01 | ⚠️ Expiring Soon |
+| 燕麦片 (Oatmeal) | 1 | bag | 08-30 | ⚠️ Low Stock |
+| 火腿肠 (Sausage) | 6 | sticks | 07-10 | Normal |
+| 豆浆粉 (Soy Milk Powder) | 10 | packets | 12-01 | Normal |
+| 香蕉 (Banana) | 3 | pieces | 06-02 | ⚠️ Expiring Soon |
+
+- **History**: 7 days of daily consumption records (milk, bread, eggs, yogurt, oatmeal, etc.)
+- **Templates**: 4 frequently used breakfast templates (milk, bread, eggs, yogurt)
+- **User Profile**: Height 175cm, Weight 70kg, Age 28, Male, Special needs: "Fat loss period, high protein & low carb"
+
+> To clear sample data, click "🗑️ Reset All Data" on the "⚙️ Settings" page, or delete files in `server/data/` and restart.
 
 ---
 
 ## ⚠️ Important Notes
 
-### Data Security
-
-1. **Regular Backups**: Recommend regularly backing up the `server/data/` directory
-2. **API Key Protection**: Keep your API key safe and don't share it
-3. **Local Storage**: All data is stored locally, pay attention to data security
-
-### Usage Recommendations
-
-1. **Network Connection**: AI suggestion features require internet connection
-2. **Port Occupation**: Default port is 3000, to change edit `server/server.js`
-3. **Browser Compatibility**: Recommend using modern browsers like Chrome, Edge, Firefox
-4. **History Records**: System automatically keeps last 7 days of records
+1. **Regular Backups**: Use the in-app "Export Data" feature for regular backups
+2. **API Key Safety**: Keep your API key safe and don't share it
+3. **Port Config**: Default 3000, change via `PORT` environment variable
+4. **Browser**: Recommend modern browsers like Chrome, Edge, or Firefox
+5. **History**: System automatically keeps the last 30 days, older records are pruned
 
 ---
 
@@ -275,49 +295,40 @@ All data is stored in the `server/data/` directory:
 
 ### Q1: How to change the port number?
 
-**A**: Edit the `server/server.js` file and modify the `PORT` variable:
+**A**: Use environment variable: `PORT=8080 npm start`, or edit the `PORT` default in `server/server.js`.
 
-```javascript
-const PORT = 3000; // Change to your desired port
-```
+### Q2: How to switch AI models?
 
-### Q2: Where is the data stored?
+**A**: Simply modify the "Model Name" text input on the "⚙️ Settings" page. Supported:
 
-**A**: All data is stored in JSON files under the `server/data/` directory:
+- `deepseek-v4-pro` (default, recommended)
+- `deepseek-v4-flash` (faster response)
+- Or any OpenAI-compatible model name
 
-- `breakfast.json` - Breakfast data
-- `user.json` - User configuration
-- `history.json` - History records
+### Q3: How to switch AI providers?
 
-### Q3: How to switch AI service provider?
-
-**A**: Modify on the "User Settings" page:
-
-- **API URL**: Change to other OpenAI-compatible API address
-- **Model Name**: Change to corresponding model name
-
-Supported AI services:
+**A**: Change the "API URL" field. Supports all OpenAI-compatible APIs:
 
 - DeepSeek: `https://api.deepseek.com/v1/chat/completions`
 - OpenAI: `https://api.openai.com/v1/chat/completions`
-- Other OpenAI-compatible services
+- Other compatible services
 
-### Q4: How long are history records kept?
+### Q4: Charts not loading?
 
-**A**: The system automatically keeps the last 7 days of history records. Records older than 7 days will be automatically deleted.
+**A**: Make sure you've run `npm install` to install the `chart.js` dependency. Charts are served locally — no internet required.
 
-### Q5: How to export data?
-
-**A**: Simply copy the JSON files in the `server/data/` directory to backup all data.
-
-### Q6: What to do if AI suggestions don't work?
+### Q5: AI suggestions not working?
 
 **A**: Please check:
 
 1. API key is correctly configured
-2. Network connection is normal
-3. API address is accessible
+2. Network connection is working
+3. API URL is accessible
 4. Model name is correct
+
+### Q6: How to migrate data?
+
+**A**: Use "📥 Export Data" to download backup → deploy to new environment → use "📤 Import Data" to restore.
 
 ---
 
@@ -343,11 +354,16 @@ Thanks to the following open-source projects and services:
 - [Node.js](https://nodejs.org/)
 - [Express](https://expressjs.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
+- [Chart.js](https://www.chartjs.org/)
 - [DeepSeek](https://www.deepseek.com/)
 
 ---
 
 <div align="center">
+
+### ⭐ If this project helps you, please consider giving it a Star!
+
+[![Star History Chart](https://api.star-history.com/svg?repos=wangshengithub/breakfast-manager&type=Date)](https://star-history.com/#wangshengithub/breakfast-manager&Date)
 
 **Made with ❤️ by wangshengithub**
 
